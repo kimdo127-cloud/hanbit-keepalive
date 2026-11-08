@@ -1,0 +1,17 @@
+name: keepalive
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+permissions:
+  actions: write
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 백엔드 깨우기
+        run: curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" --max-time 90 -X POST https://hanbit-math-backend.onrender.com/api/web/getPushKey -H "Content-Type: application/json" -d '{"args":[]}'
+      - name: 60일 자동 중지 방지
+        run: gh api -X PUT repos/${{ github.repository }}/actions/workflows/keepalive.yml/enable
+        env:
+          GH_TOKEN: ${{ github.token }}
